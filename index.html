@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Baniyas Admission Exam</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dark: #0d0f14;
+  --dark2: #151820;
+  --dark3: #1c2030;
+  --dark4: #242838;
+  --border: rgba(255,255,255,0.07);
+  --accent: #c8102e;
+  --accent2: #e63950;
+  --green: #00c896;
+  --green-bg: rgba(0,200,150,0.1);
+  --red: #ff4757;
+  --red-bg: rgba(255,71,87,0.1);
+  --amber: #ffa502;
+  --amber-bg: rgba(255,165,2,0.1);
+  --text: #e8eaf0;
+  --text2: #8b90a0;
+  --text3: #555970;
+  --radius: 12px;
+  --radius-lg: 18px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Outfit',sans-serif; background:var(--dark); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+/* PORTAL SCREEN */
+#portal { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--dark); padding:24px; }
+.portal-logo { font-size:13px; font-weight:600; letter-spacing:0.2em; color:var(--text3); text-transform:uppercase; margin-bottom:8px; }
+.portal-title { font-size:36px; font-weight:700; color:var(--text); text-align:center; line-height:1.2; margin-bottom:6px; }
+.portal-title span { color:var(--accent2); }
+.portal-sub { font-size:14px; color:var(--text2); margin-bottom:48px; text-align:center; }
+.portal-cards { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; width:100%; max-width:600px; }
+.portal-card { flex:1; min-width:240px; background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px 24px; cursor:pointer; transition:all 0.2s; text-align:center; }
+.portal-card:hover { border-color:var(--accent2); background:var(--dark4); transform:translateY(-2px); }
+.portal-card.admin-card:hover { border-color:#4a9eff; }
+.portal-icon { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto 16px; }
+.portal-card-title { font-size:17px; font-weight:600; color:var(--text); margin-bottom:6px; }
+.portal-card-sub { font-size:13px; color:var(--text2); line-height:1.5; }
+.portal-badge { display:inline-block; font-size:10px; font-weight:600; letter-spacing:0.08em; padding:3px 8px; border-radius:999px; margin-top:12px; }
+
+/* LOGIN MODAL */
+#login-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:100; align-items:center; justify-content:center; padding:24px; }
+#login-modal.show { display:flex; }
+.login-box { background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius-lg); padding:32px; width:100%; max-width:380px; }
+.login-title { font-size:20px; font-weight:700; margin-bottom:4px; }
+.login-sub { font-size:13px; color:var(--text2); margin-bottom:24px; }
+.form-group { margin-bottom:14px; }
+.form-group label { font-size:12px; font-weight:500; color:var(--text2); display:block; margin-bottom:6px; letter-spacing:0.05em; text-transform:uppercase; }
+.form-group input { width:100%; padding:11px 14px; background:var(--dark4); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:14px; font-family:'Outfit',sans-serif; outline:none; transition:border-color 0.2s; }
+.form-group input:focus { border-color:var(--accent2); }
+.btn-login { width:100%; padding:13px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius); font-size:15px; font-weight:600; cursor:pointer; font-family:'Outfit',sans-serif; transition:background 0.2s; margin-top:4px; }
+.btn-login:hover { background:var(--accent2); }
+.login-err { color:var(--red); font-size:13px; margin-top:8px; display:none; }
+.btn-cancel { width:100%; padding:10px; background:transparent; color:var(--text2); border:1px solid var(--border); border-radius:var(--radius); font-size:14px; cursor:pointer; font-family:'Outfit',sans-serif; margin-top:8px; }
+
+/* MAIN APP */
+#app { display:none; min-height:100vh; flex-direction:column; }
+#app.show { display:flex; }
+
+/* HEADER */
+.header { background:var(--dark2); border-bottom:1px solid var(--border); padding:0 24px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; flex-shrink:0; }
+.header-left { display:flex; align-items:center; gap:12px; }
+.header-logo { width:32px; height:32px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:800; color:#fff; flex-shrink:0; }
+.header-title { font-size:15px; font-weight:700; color:var(--text); }
+.header-subtitle { font-size:11px; color:var(--text3); }
+.header-right { display:flex; align-items:center; gap:10px; }
+.role-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; letter-spacing:0.05em; }
+.btn-sm { padding:7px 14px; border-radius:9px; font-size:12px; font-weight:600; cursor:pointer; border:none; font-family:'Outfit',sans-serif; transition:all 0.15s; }
+.btn-outline { background:transparent; color:var(--text2); border:1px solid var(--border); }
+.btn-outline:hover { background:var(--dark4); color:var(--text); }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:var(--accent2); }
+.btn-success { background:var(--green); color:#000; font-weight:700; }
+
+/* STATS */
+.stats-bar { background:var(--dark2); border-bottom:1px solid var(--border); padding:14px 24px; display:flex; gap:20px; overflow-x:auto; }
+.stat { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.stat-num { font-size:22px; font-weight:700; font-family:'DM Mono',monospace; }
+.stat-label { font-size:12px; color:var(--text2); font-weight:500; line-height:1.3; }
+.stat-divider { width:1px; background:var(--border); height:32px; flex-shrink:0; }
+
+/* TOOLBAR */
+.toolbar { padding:14px 24px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:var(--dark); border-bottom:1px solid var(--border); }
+.search-wrap { flex:1; min-width:200px; position:relative; }
+.search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text3); font-size:14px; }
+.search-input { width:100%; padding:9px 12px 9px 36px; background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-size:13px; font-family:'Outfit',sans-serif; outline:none; transition:border-color 0.2s; }
+.search-input:focus { border-color:var(--accent2); }
+.search-input::placeholder { color:var(--text3); }
+.filter-tabs { display:flex; background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.filter-tab { padding:8px 14px; font-size:12px; font-weight:600; cursor:pointer; color:var(--text2); border:none; background:transparent; font-family:'Outfit',sans-serif; transition:all 0.15s; }
+.filter-tab.active { background:var(--dark4); color:var(--text); }
+
+/* LAYOUT */
+.main-layout { display:flex; flex:1; overflow:hidden; }
+.students-panel { flex:1; overflow-y:auto; padding:16px 24px; }
+.sidebar { width:280px; border-left:1px solid var(--border); background:var(--dark2); overflow-y:auto; flex-shrink:0; display:flex; flex-direction:column; }
+
+/* STUDENT GRID */
+.students-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:10px; }
+.student-card { background:var(--dark3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; display:flex; align-items:center; gap:12px; transition:all 0.15s; }
+.student-card:hover { border-color:rgba(255,255,255,0.12); background:var(--dark4); }
+.student-avatar { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; flex-shrink:0; }
+.student-info { flex:1; min-width:0; }
+.student-name { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:2px; }
+.student-id { font-size:11px; color:var(--text3); font-family:'DM Mono',monospace; }
+.student-room { font-size:11px; color:var(--text2); }
+.student-actions { display:flex; flex-direction:column; gap:4px; align-items:flex-end; }
+.status-pill { font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; cursor:pointer; border:none; font-family:'Outfit',sans-serif; transition:all 0.15s; }
+.btn-reset { font-size:10px; color:var(--text3); background:none; border:none; cursor:pointer; font-family:'Outfit',sans-serif; padding:2px 4px; }
+.btn-reset:hover { color:var(--text2); }
+
+/* SIDEBAR */
+.sidebar-header { padding:16px; border-bottom:1px solid var(--border); }
+.sidebar-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.sidebar-sub { font-size:11px; color:var(--text3); }
+.timeline { padding:12px; display:flex; flex-direction:column; gap:8px; }
+.timeline-item { background:var(--dark3); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+.timeline-name { font-size:12px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.timeline-meta { font-size:11px; color:var(--text2); display:flex; justify-content:space-between; }
+.timeline-badge { font-size:10px; font-weight:600; padding:2px 7px; border-radius:999px; }
+
+/* ADMIN TOOLBAR EXTRAS */
+.import-area { border:2px dashed var(--border); border-radius:var(--radius); padding:16px; text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:16px; }
+.import-area:hover { border-color:var(--accent2); }
+.import-area p { font-size:13px; color:var(--text2); margin-top:6px; }
+.import-area strong { font-size:14px; color:var(--text); }
+
+/* EMPTY STATE */
+.empty { text-align:center; padding:60px 20px; color:var(--text3); }
+.empty-icon { font-size:48px; margin-bottom:12px; }
+.empty h3 { font-size:16px; color:var(--text2); margin-bottom:6px; }
+.empty p { font-size:13px; }
+
+/* NOTIFICATION */
+.notif { position:fixed; bottom:24px; right:24px; padding:12px 18px; border-radius:var(--radius); font-size:13px; font-weight:500; color:#fff; z-index:200; opacity:0; transform:translateY(8px); transition:all 0.3s; pointer-events:none; }
+.notif.show { opacity:1; transform:translateY(0); }
+
+/* DASHBOARD */
+.dashboard { padding: 16px 24px; display: none; }
+.dashboard.show { display: block; }
+.dash-title { font-size: 22px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 4px; }
+.dash-sub { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 20px; }
+.dash-sessions { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.dash-session { border-radius: var(--radius-lg); padding: 16px; border: 2px solid; }
+.dash-session.s1 { border-color: #4a9eff; background: rgba(74,158,255,0.05); }
+.dash-session.s2 { border-color: #00c896; background: rgba(0,200,150,0.05); }
+.dash-session-title { font-size: 14px; font-weight: 700; text-align: center; letter-spacing: 0.08em; margin-bottom: 14px; }
+.s1 .dash-session-title { color: #4a9eff; }
+.s2 .dash-session-title { color: #00c896; }
+.dash-gender-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.dash-gender { background: var(--dark3); border-radius: var(--radius); padding: 12px; text-align: center; }
+.dash-gender-title { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.dash-gender-count { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+.dash-gender-sub { font-size: 11px; color: var(--text2); margin-bottom: 10px; }
+.donut-wrap { position: relative; width: 80px; height: 80px; margin: 0 auto 8px; }
+.donut-wrap svg { transform: rotate(-90deg); }
+.donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+.donut-pct { font-size: 14px; font-weight: 700; }
+.donut-lbl { font-size: 9px; color: var(--text2); }
+.dash-legend { display: flex; justify-content: center; gap: 10px; font-size: 10px; color: var(--text2); }
+.dash-legend span { display: flex; align-items: center; gap: 3px; }
+.dash-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dash-session-total { background: var(--dark4); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; color: var(--text2); }
+.dash-session-total strong { font-size: 20px; font-weight: 700; color: var(--text); }
+.dash-overall { background: var(--dark3); border-radius: var(--radius-lg); padding: 20px; border: 2px solid var(--amber); }
+.dash-overall-title { font-size: 14px; font-weight: 700; text-align: center; letter-spacing: 0.08em; color: var(--amber); margin-bottom: 16px; }
+.dash-overall-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.dash-overall-item { background: var(--dark4); border-radius: var(--radius); padding: 14px; text-align: center; }
+.dash-overall-icon { font-size: 28px; margin-bottom: 6px; }
+.dash-overall-num { font-size: 24px; font-weight: 700; }
+.dash-overall-out { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.dash-overall-bar { height: 4px; background: var(--dark2); border-radius: 999px; overflow: hidden; margin: 6px 0; }
+.dash-overall-fill { height: 100%; border-radius: 999px; }
+.dash-overall-pct { font-size: 12px; font-weight: 600; }
+.dash-tabs { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
+.dash-tab { padding: 8px 20px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--dark3); color: var(--text2); font-family: Outfit,sans-serif; transition: all 0.15s; }
+.dash-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+@media(max-width:768px) { .dash-sessions { grid-template-columns: 1fr; } .dash-overall-grid { grid-template-columns: 1fr; } }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--dark4); border-radius:4px; }
+
+@media(max-width:768px) {
+  .sidebar { display:none; }
+  .stats-bar { gap:14px; }
+  .students-grid { grid-template-columns:1fr; }
+  .header-title { font-size:13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- PORTAL -->
+<div id="portal">
+  <img src="https://i.ibb.co/V0hTbPPB/ATS-logo.png" style="height:48px;width:auto;object-fit:contain;margin-bottom:16px;" alt="ATS Logo"/>
+  <div class="portal-logo">Baniyas Admission Exam</div>
+  <h1 class="portal-title">Student <span>Attendance</span> Hub</h1>
+  <p class="portal-sub">Select your access level to continue</p>
+  <div class="portal-cards">
+    <div class="portal-card" onclick="enterFazza()">
+      <div class="portal-icon" style="background:rgba(0,200,150,0.12)">🎓</div>
+      <div class="portal-card-title">Fazza Student</div>
+      <div class="portal-card-sub">Sign in or sign out. View your attendance status in real time.</div>
+      <div class="portal-badge" style="background:var(--green-bg); color:var(--green)">NO LOGIN REQUIRED</div>
+    </div>
+    <div class="portal-card admin-card" onclick="showAdminLogin()">
+      <div class="portal-icon" style="background:rgba(74,158,255,0.12)">🛡️</div>
+      <div class="portal-card-title">Admin</div>
+      <div class="portal-card-sub">Import students, manage attendance, view analytics and activity logs.</div>
+      <div class="portal-badge" style="background:rgba(74,158,255,0.1); color:#4a9eff">REQUIRES LOGIN</div>
+    </div>
+    <div class="portal-card" onclick="showAssessorLogin()">
+      <div class="portal-icon" style="background:rgba(167,139,250,0.12)">📋</div>
+      <div class="portal-card-title">Assessor</div>
+      <div class="portal-card-sub">Track admission exam, interview and medical examination results.</div>
+      <div class="portal-badge" style="background:rgba(167,139,250,0.1); color:#a78bfa">REQUIRES LOGIN</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div id="login-modal">
+  <div class="login-box">
+    <div class="login-title">Admin Sign In</div>
+    <div class="login-sub">Enter your credentials to access the admin panel</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="admin-email" placeholder="admin@baniyas.ae"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="admin-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+    </div>
+    <div class="login-err" id="login-err">Invalid email or password</div>
+    <button class="btn-login" onclick="doAdminLogin()">Sign In</button>
+    <button class="btn-cancel" onclick="closeLogin()">Cancel</button>
+  </div>
+</div>
+
+<!-- ASSESSOR LOGIN MODAL -->
+<div id="assessor-login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;padding:24px;">
+  <div class="login-box">
+    <div class="login-title">Assessor Sign In</div>
+    <div class="login-sub">Select your assessment role to continue</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <button onclick="selectAssessorRole('exam')" id="role-exam" style="padding:14px;background:var(--dark4);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;text-align:left;transition:all 0.2s;">
+        📝 Admission Exam Assessor
+      </button>
+      <button onclick="selectAssessorRole('interview')" id="role-interview" style="padding:14px;background:var(--dark4);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;text-align:left;transition:all 0.2s;">
+        🎤 Interview Assessor
+      </button>
+      <button onclick="selectAssessorRole('medical')" id="role-medical" style="padding:14px;background:var(--dark4);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;text-align:left;transition:all 0.2s;">
+        🏥 Medical Examination Assessor
+      </button>
+    </div>
+    <div id="assessor-role-err" style="color:var(--red);font-size:13px;margin-bottom:10px;display:none;">Please select a role</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="assessor-email" placeholder="assessor@baniyas.ae"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="assessor-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAssessorLogin()"/>
+    </div>
+    <div class="login-err" id="assessor-login-err">Invalid email or password</div>
+    <button class="btn-login" onclick="doAssessorLogin()" style="background:#a78bfa;">Sign In</button>
+    <button class="btn-cancel" onclick="closeAssessorLogin()">Cancel</button>
+  </div>
+</div>
+
+<!-- ASSESSOR APP -->
+<div id="assessor-app" style="display:none;min-height:100vh;flex-direction:column;">
+  <!-- ASSESSOR HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <img src="https://i.ibb.co/V0hTbPPB/ATS-logo.png" style="height:36px;width:auto;border-radius:6px;object-fit:contain;" alt="ATS Logo"/>
+      <div>
+        <div class="header-title">Baniyas Admission Exam</div>
+        <div class="header-subtitle" id="assessor-header-sub">Assessment Tracker</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="assessor-role-badge" class="role-badge" style="background:rgba(167,139,250,0.15);color:#a78bfa;"></span>
+      <button class="btn-sm btn-outline" id="assessor-btn-export" onclick="exportAssessments()" style="display:none;">📊 Export</button>
+      <button class="btn-sm btn-outline" onclick="exitAssessorApp()">Exit</button>
+    </div>
+  </div>
+
+  <!-- ASSESSOR STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="astat-total" style="color:var(--text)">0</div>
+      <div class="stat-label">Total<br>Students</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="astat-completed" style="color:var(--green)">0</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="astat-pending" style="color:var(--amber)">0</div>
+      <div class="stat-label">Not Yet<br>Completed</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="astat-rate" style="color:#a78bfa">0%</div>
+      <div class="stat-label">Completion<br>Rate</div>
+    </div>
+  </div>
+
+  <!-- ASSESSOR TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="assessor-search" placeholder="Search by name or ID..." oninput="renderAssessments()"/>
+    </div>
+    <div style="position:relative;display:inline-block;">
+      <select id="assessor-room-select" onchange="setAssessorRoom(this.value)" style="padding:8px 32px 8px 12px;background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;font-family:Outfit,sans-serif;cursor:pointer;appearance:none;outline:none;min-width:160px;">
+        <option value="all">All Rooms</option>
+      </select>
+      <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text2);font-size:12px;">▾</span>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setAssessorFilter('all',this)">All</button>
+      <button class="filter-tab" onclick="setAssessorFilter('completed',this)">Completed</button>
+      <button class="filter-tab" onclick="setAssessorFilter('pending',this)">Not Yet Completed</button>
+    </div>
+  </div>
+
+  <!-- ASSESSOR GRID -->
+  <div style="padding:16px 24px;flex:1;">
+    <div id="assessor-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <img src="https://i.ibb.co/V0hTbPPB/ATS-logo.png" style="height:36px;width:auto;border-radius:6px;object-fit:contain;" alt="ATS Logo"/>
+      <div>
+        <div class="header-title">Baniyas Admission Exam</div>
+        <div class="header-subtitle" id="header-sub">Student Attendance Hub</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="role-badge" id="role-badge"></span>
+      <button class="btn-sm btn-outline" id="btn-template" onclick="downloadTemplate()" style="display:none">📄 Template</button>
+      <button class="btn-sm btn-outline" id="btn-export" onclick="exportToExcel()" style="display:none">📊 Export</button>
+      <label class="btn-sm btn-primary" id="btn-import" style="display:none; cursor:pointer">
+        📥 Import Excel
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(this)"/>
+      </label>
+      <button class="btn-sm" id="btn-clear" onclick="confirmClearStudents()" style="display:none; background:#ff4757; color:#fff; border:none;">🗑️ Clear List</button>
+      <button class="btn-sm btn-outline" onclick="exitApp()">Exit</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="stat-total" style="color:var(--text)">0</div>
+      <div class="stat-label">Total<br>Students</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="stat-present" style="color:var(--green)">0</div>
+      <div class="stat-label">Present<br>Students</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="stat-absent" style="color:var(--red)">0</div>
+      <div class="stat-label">Absent<br>Students</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num" id="stat-rate" style="color:var(--amber)">0%</div>
+      <div class="stat-label">Attendance<br>Rate</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="search-input" placeholder="Search by name, ID or room..." oninput="renderStudents()"/>
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-tab" onclick="setFilter('present',this)">Present</button>
+      <button class="filter-tab" onclick="setFilter('absent',this)">Absent</button>
+    </div>
+    <button class="btn-sm btn-outline" id="btn-dashboard" onclick="toggleDashboard()" style="display:none">📊 Dashboard</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard-panel">
+    <div class="dash-title">ATTENDANCE SUMMARY</div>
+    <div class="dash-sub">Attendance breakdown by room</div>
+    <div style="display:flex;justify-content:center;margin-bottom:20px;">
+      <div style="position:relative;display:inline-block;min-width:280px;">
+        <select id="dash-room-select" onchange="setDashRoom(this.value)" style="width:100%;padding:10px 40px 10px 16px;background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-family:Outfit,sans-serif;cursor:pointer;appearance:none;outline:none;">
+          <option value="all">All Rooms</option>
+        </select>
+        <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text2);">▾</span>
+      </div>
+    </div>
+    <div id="dash-rooms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:16px;"></div>
+    <div class="dash-overall" id="dash-overall"></div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="main-layout">
+    <div class="students-panel">
+      <div class="students-grid" id="students-grid"></div>
+    </div>
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Activity Timeline</div>
+        <div class="sidebar-sub">Recent sign-in / sign-out events</div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT DETAIL MODAL -->
+<div id="student-detail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closeStudentDetail()">
+  <div style="background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:460px;overflow:hidden;">
+    <!-- Modal Header -->
+    <div id="sdm-header" style="padding:20px 24px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);">
+      <div id="sdm-avatar" style="width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div id="sdm-name" style="font-size:16px;font-weight:700;color:var(--text);"></div>
+        <div id="sdm-id" style="font-size:12px;color:var(--text2);margin-top:2px;"></div>
+      </div>
+      <div id="sdm-status-badge" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:999px;"></div>
+      <button onclick="closeStudentDetail()" style="background:transparent;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;line-height:1;">✕</button>
+    </div>
+    <!-- Modal Body -->
+    <div style="padding:20px 24px;">
+      <!-- Info grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="sdm-info-grid"></div>
+      <!-- Assessment Status -->
+      <div style="background:var(--dark2);border-radius:var(--radius);padding:14px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--text2);margin-bottom:10px;text-transform:uppercase;">Assessment Status</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;" id="sdm-assessments"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let students = [];
+let timeline = [];
+let currentFilter = 'all';
+let currentDashRoom = 'all';
+let currentRole = null; // 'fazza' | 'admin'
+let db = null;
+let unsubscribe = null;
+
+// ─── FIREBASE CONFIG ─────────────────────────────────────────────────────────
+// REPLACE with your Firebase config
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCMRNNrWgl_glyOPW1SxnYnNWWsjwbGzvo",
+  authDomain: "admission-exam-registration.firebaseapp.com",
+  projectId: "admission-exam-registration",
+  storageBucket: "admission-exam-registration.firebasestorage.app",
+  messagingSenderId: "158804979802",
+  appId: "1:158804979802:web:174b67705df7ce1d69a863",
+  measurementId: "G-CVG8578CH2"
+};
+
+// ADMIN CREDENTIALS (change these)
+const ADMIN_EMAIL = "ali.ghneimat@actvet.gov.ae";
+const ADMIN_PASSWORD = "admin123";
+
+// ─── PORTAL ──────────────────────────────────────────────────────────────────
+function enterFazza() {
+  currentRole = 'fazza';
+  launchApp();
+}
+
+function showAdminLogin() {
+  document.getElementById('login-modal').classList.add('show');
+  setTimeout(() => document.getElementById('admin-email').focus(), 100);
+}
+
+function closeLogin() {
+  document.getElementById('login-modal').classList.remove('show');
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('admin-email').value = '';
+  document.getElementById('admin-password').value = '';
+}
+
+function doAdminLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-password').value;
+
+  // First check hardcoded admin credentials
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASSWORD) {
+    currentRole = 'admin';
+    closeLogin();
+    launchApp();
+    return;
+  }
+
+  // Try Firebase Auth for all other users
+  if (FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY') {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then(() => {
+        if (!firebaseInitialized) {
+          db = firebase.firestore();
+          firebaseInitialized = true;
+        }
+        currentRole = 'admin';
+        closeLogin();
+        launchApp();
+      })
+      .catch(() => { document.getElementById('login-err').style.display = 'block'; });
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function launchApp() {
+  document.getElementById('portal').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+
+  // Set role UI
+  const badge = document.getElementById('role-badge');
+  if (currentRole === 'admin') {
+    badge.textContent = 'ADMIN';
+    badge.style.cssText = 'background:rgba(74,158,255,0.15);color:#4a9eff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:0.05em;';
+    document.getElementById('btn-import').style.display = 'inline-flex';
+    document.getElementById('btn-template').style.display = 'inline-flex';
+    document.getElementById('btn-export').style.display = 'inline-flex';
+    document.getElementById('btn-clear').style.display = 'inline-flex';
+    document.getElementById('btn-dashboard').style.display = 'inline-flex';
+    document.getElementById('header-sub').textContent = 'Admin Panel';
+  } else {
+    badge.textContent = 'FAZZA STUDENT';
+    badge.style.cssText = 'background:rgba(0,200,150,0.15);color:#00c896;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:0.05em;';
+    document.getElementById('btn-import').style.display = 'none';
+    document.getElementById('btn-template').style.display = 'none';
+    document.getElementById('header-sub').textContent = 'Student View';
+    // Show name prompt for fazza students
+    setTimeout(() => promptStudentName(), 300);
+  }
+
+  initFirebase();
+}
+
+function exitApp() {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  // Don't clear students array - data stays in Firebase
+  // Just reset UI state
+  students = [];
+  timeline = [];
+  currentRole = null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('portal').style.display = 'flex';
+  document.getElementById('search-input').value = '';
+  currentFilter = 'all';
+  currentStudentName = '';
+  sessionStorage.removeItem('fazza_student_name');
+  document.querySelectorAll('.filter-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+}
+
+// ─── STUDENT NAME CAPTURE ────────────────────────────────────────────────────
+let currentStudentName = '';
+
+function promptStudentName() {
+  const existing = sessionStorage.getItem('fazza_student_name');
+  if (existing) { currentStudentName = existing; return; }
+  
+  const modal = document.createElement('div');
+  modal.id = 'name-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:#1c2030;border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:32px;width:100%;max-width:380px;">
+      <div style="font-size:20px;font-weight:700;color:#e8eaf0;margin-bottom:4px;">Welcome</div>
+      <div style="font-size:13px;color:#8b90a0;margin-bottom:24px;">Please enter your name to continue</div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:500;color:#8b90a0;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Your Name</label>
+        <input id="student-name-input" type="text" placeholder="Enter your full name" style="width:100%;padding:11px 14px;background:#242838;border:1px solid rgba(255,255,255,0.07);border-radius:12px;color:#e8eaf0;font-size:14px;font-family:Outfit,sans-serif;outline:none;box-sizing:border-box;"/>
+      </div>
+      <button onclick="confirmStudentName()" style="width:100%;padding:13px;background:#c8102e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;">Continue</button>
+    </div>`;
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('student-name-input').focus(), 100);
+  document.getElementById('student-name-input').addEventListener('keydown', e => { if(e.key==='Enter') confirmStudentName(); });
+}
+
+function confirmStudentName() {
+  const input = document.getElementById('student-name-input');
+  const name = input ? input.value.trim() : '';
+  if (!name) { notify('Please enter your name', 'red'); return; }
+  currentStudentName = name;
+  sessionStorage.setItem('fazza_student_name', name);
+  const modal = document.getElementById('name-modal');
+  if (modal) modal.remove();
+}
+
+// ─── FIREBASE ─────────────────────────────────────────────────────────────────
+let firebaseInitialized = false;
+
+function initFirebase() {
+  if (FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
+    loadFromLocal();
+    return;
+  }
+  try {
+    if (!firebaseInitialized) {
+      if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+      firebaseInitialized = true;
+    }
+
+    // Unsubscribe previous listeners if any
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+
+    const unsub1 = db.collection('students').onSnapshot(snap => {
+      students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateStats();
+      renderStudents();
+      renderTimeline();
+    }, err => {
+      console.error('Firestore students error:', err);
+      loadFromLocal();
+    });
+
+    let unsub2 = null;
+    try {
+      unsub2 = db.collection('timeline').orderBy('ts','desc').limit(30).onSnapshot(snap => {
+        timeline = snap.docs.map(d => d.data());
+        renderTimeline();
+      });
+    } catch(e) { console.warn('Timeline listener failed:', e); }
+
+    // Also load assessments so info modal works from admin screen
+    let unsub3 = null;
+    try {
+      unsub3 = db.collection('assessments').onSnapshot(snap => {
+        snap.docs.forEach(d => { assessments[d.id] = d.data(); });
+      });
+    } catch(e) { console.warn('Assessments listener failed:', e); }
+
+    unsubscribe = () => { unsub1(); if(unsub2) unsub2(); if(unsub3) unsub3(); };
+
+  } catch(e) {
+    console.error('Firebase init error:', e);
+    loadFromLocal();
+  }
+}
+
+// ─── LOCAL STORAGE (demo mode) ───────────────────────────────────────────────
+function loadFromLocal() {
+  const saved = localStorage.getItem('baniyas_students');
+  students = saved ? JSON.parse(saved) : [];
+  const savedTL = localStorage.getItem('baniyas_timeline');
+  timeline = savedTL ? JSON.parse(savedTL) : [];
+  updateStats();
+  renderStudents();
+  renderTimeline();
+}
+
+function saveToLocal() {
+  localStorage.setItem('baniyas_students', JSON.stringify(students));
+  localStorage.setItem('baniyas_timeline', JSON.stringify(timeline.slice(0,50)));
+}
+
+// ─── SIGN IN / OUT ───────────────────────────────────────────────────────────
+async function markStudent(studentId, newStatus) {
+  if (currentRole === 'fazza' && !currentStudentName) { 
+    promptStudentName(); 
+    setTimeout(() => markStudent(studentId, newStatus), 2000);
+    return; 
+  }
+  const s = students.find(x => x.id === studentId);
+  if (!s) { notify('Student not found', 'red'); return; }
+  
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  const markedBy = currentRole === 'admin' ? 'Admin' : currentStudentName;
+  const entry = { name: s.name, id: s.id, action: newStatus === 'present' ? 'Signed In' : 'Signed Out', time: timeStr, ts: now.getTime(), markedBy };
+
+  if (db) {
+    try {
+      await db.collection('students').doc(studentId).set({ status: newStatus, lastTime: timeStr, markedBy }, { merge: true });
+      await db.collection('timeline').add(entry);
+      // Optimistic local update so stats refresh instantly
+      const local = students.find(x => x.id === studentId);
+      if (local) { local.status = newStatus; local.lastTime = timeStr; local.markedBy = markedBy; }
+      timeline.unshift(entry);
+      updateStats();
+      renderStudents();
+      renderTimeline();
+    } catch(e) {
+      notify('Error saving: ' + e.message, 'red');
+      return;
+    }
+  } else {
+    s.status = newStatus;
+    s.lastTime = timeStr;
+    s.markedBy = markedBy;
+    timeline.unshift(entry);
+    saveToLocal();
+    updateStats();
+    renderStudents();
+    renderTimeline();
+  }
+  notify(newStatus === 'present' ? `${s.name} signed in ✅` : `${s.name} signed out`, newStatus === 'present' ? 'green' : 'red');
+}
+
+async function toggleStatus(studentId) {
+  const s = students.find(x => x.id === studentId);
+  if (!s) return;
+  await markStudent(studentId, s.status === 'present' ? 'absent' : 'present');
+}
+
+async function resetStudent(studentId) {
+  const s = students.find(x => x.id === studentId);
+  if (!s) return;
+  if (db) {
+    await db.collection('students').doc(studentId).set({ status: 'absent', lastTime: '', markedBy: '' }, { merge: true });
+  } else {
+    s.status = 'absent';
+    s.lastTime = '';
+    saveToLocal();
+    updateStats();
+    renderStudents();
+  }
+  notify(`${s.name} reset 🔄`, 'amber');
+}
+
+// ─── IMPORT EXCEL ─────────────────────────────────────────────────────────────
+function importExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      let count = 0;
+
+      if (rows.length === 0) { notify('No data found in file', 'red'); return; }
+      for (const row of rows) {
+        const idKey = Object.keys(row).find(k => k.toLowerCase().includes('applicationid') || k.toLowerCase() === 'id');
+        const nameKey = Object.keys(row).find(k => k.toLowerCase().includes('english name') || k.toLowerCase() === 'name');
+        const nameArKey = Object.keys(row).find(k => k.toLowerCase().includes('arabic name'));
+        const eidKey = Object.keys(row).find(k => k.toLowerCase() === 'eid');
+        const phone1Key = Object.keys(row).find(k => k.toLowerCase() === 'phone1');
+        const phone2Key = Object.keys(row).find(k => k.toLowerCase() === 'phone2');
+        const mobileKey = Object.keys(row).find(k => k.toLowerCase().includes('stud.mobile') || k.toLowerCase().includes('mobile'));
+        const emailKey = Object.keys(row).find(k => k.toLowerCase() === 'email');
+        const campusKey = Object.keys(row).find(k => k.toLowerCase() === 'campus');
+        const roomKey = Object.keys(row).find(k => k.toLowerCase() === 'room');
+        const examTimeKey = Object.keys(row).find(k => k.toLowerCase().includes('exam time'));
+
+        if (!idKey || !nameKey) continue;
+        const id = String(row[idKey]).trim();
+        const name = String(row[nameKey]).trim();
+        if (!id || !name) continue;
+
+        const student = {
+          id, name,
+          nameAr: nameArKey ? String(row[nameArKey]).trim() : '',
+          eid: eidKey ? String(row[eidKey]).trim() : '',
+          phone1: phone1Key ? String(row[phone1Key]).trim() : '',
+          phone2: phone2Key ? String(row[phone2Key]).trim() : '',
+          mobile: mobileKey ? String(row[mobileKey]).trim() : '',
+          email: emailKey ? String(row[emailKey]).trim() : '',
+          campus: campusKey ? String(row[campusKey]).trim() : '',
+          room: roomKey ? String(row[roomKey]).trim() : '',
+          examTime: examTimeKey ? (() => {
+            const v = row[examTimeKey];
+            if (typeof v === 'number') {
+              // Excel time fraction to HH:MM AM/PM
+              const totalMins = Math.round(v * 24 * 60);
+              const h = Math.floor(totalMins / 60) % 24;
+              const m = totalMins % 60;
+              const ampm = h >= 12 ? 'PM' : 'AM';
+              const h12 = h % 12 || 12;
+              return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+            }
+            return String(v).trim();
+          })() : '',
+          status: 'absent', lastTime: ''
+        };
+
+        if (db) {
+          try {
+            await db.collection('students').doc(id).set(student, { merge: true });
+          } catch(dbErr) {
+            // If Firestore fails, fall back to local
+            db = null;
+            const existing = students.findIndex(s => s.id === id);
+            if (existing >= 0) students[existing] = { ...students[existing], ...student };
+            else students.push(student);
+          }
+        } else {
+          const existing = students.findIndex(s => s.id === id);
+          if (existing >= 0) students[existing] = { ...students[existing], ...student };
+          else students.push(student);
+        }
+        count++;
+      }
+
+      if (!db) { saveToLocal(); updateStats(); renderStudents(); }
+      notify(`${count} students imported successfully ✅`, 'green');
+    } catch(err) {
+      console.error('Import error:', err);
+      notify('Import failed: ' + err.message, 'red');
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function exportToExcel() {
+  if (students.length === 0) { notify('No data to export', 'red'); return; }
+  
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB').replace(/\//g, '-');
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }).replace(':', '-').replace(' ', '');
+
+  const rows = [
+    ['ApplicationID', 'English Name', 'Arabic Name', 'EID', 'Phone1', 'Phone2', 'Mobile', 'Email', 'Campus', 'Room', 'Exam Time', 'Status', 'Sign In Time', 'Marked By']
+  ];
+
+  // Sort: present first, then absent
+  const sorted = [...students].sort((a, b) => {
+    if (a.status === 'present' && b.status !== 'present') return -1;
+    if (a.status !== 'present' && b.status === 'present') return 1;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  sorted.forEach(s => {
+    rows.push([
+      s.id || '',
+      s.name || '',
+      s.nameAr || '',
+      s.eid || '',
+      s.phone1 || '',
+      s.phone2 || '',
+      s.mobile || '',
+      s.email || '',
+      s.campus || '',
+      s.room || '',
+      s.examTime || '',
+      s.status === 'present' ? 'Present' : 'Absent',
+      s.lastTime || '',
+      s.markedBy || ''
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Set column widths
+  ws['!cols'] = [
+    {wch:12},{wch:30},{wch:30},{wch:20},{wch:12},{wch:12},{wch:12},
+    {wch:28},{wch:20},{wch:25},{wch:12},{wch:10},{wch:12},{wch:20}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+  // Summary sheet
+  const present = students.filter(s => s.status === 'present').length;
+  const absent = students.length - present;
+  const rate = students.length ? Math.round(present / students.length * 100) : 0;
+  const summaryRows = [
+    ['Baniyas Admission Exam - Attendance Report'],
+    [''],
+    ['Export Date', dateStr],
+    ['Export Time', now.toLocaleTimeString()],
+    [''],
+    ['Total Students', students.length],
+    ['Present Students', present],
+    ['Absent Students', absent],
+    ['Attendance Rate', rate + '%'],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(summaryRows);
+  ws2['!cols'] = [{wch:20},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+
+  XLSX.writeFile(wb, `Baniyas_Attendance_${dateStr}_${timeStr}.xlsx`);
+  notify(`Exported ${students.length} students ✅`, 'green');
+}
+
+function downloadTemplate() {
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['ApplicationID', 'English Name', 'Arabic Name', 'EID', 'Phone1', 'Phone2', 'Stud.Mobile', 'Email', 'Campus', 'Room', 'Exam Time'],
+    ['202601754', 'ABDULAZIZ ABDULLA ALI ALHAJRI', 'عبدالعزيز عبدالله علي الحاجري', '784-1990-1234567-1', '0501234567', '0551234567', '0561234567', 'student@email.com', 'ATS-AUH-B-BANIYAS', 'Exam Committee A - Boys', '8:00 AM'],
+    ['202601753', 'ABDULLA ESMAEEL ABDULLA ALBESHR', 'عبدالله اسماعيل عبدالله البشر', '784-1991-7654321-1', '0507654321', '0557654321', '0567654321', 'student2@email.com', 'ATS-AUH-B-BANIYAS', 'Exam Committee A - Boys', '8:00 AM'],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Students');
+  XLSX.writeFile(wb, 'baniyas_template.xlsx');
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderStudents();
+}
+
+function renderStudents() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const grid = document.getElementById('students-grid');
+
+  let filtered = students.filter(s => {
+    const matchSearch = !search || 
+      s.name?.toLowerCase().includes(search) || 
+      s.nameAr?.includes(search) ||
+      s.id?.includes(search) || 
+      s.room?.toLowerCase().includes(search) ||
+      s.mobile?.includes(search) ||
+      s.phone1?.includes(search) ||
+      s.phone2?.includes(search);
+    const matchFilter = currentFilter === 'all' || s.status === currentFilter;
+    return matchSearch && matchFilter;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div><h3>${students.length === 0 ? 'No students imported yet' : 'No students match your search'}</h3><p>${students.length === 0 && currentRole === 'admin' ? 'Import an Excel file to get started' : ''}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => {
+    const isPresent = s.status === 'present';
+    const initials = (s.name || '?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const avatarBg = isPresent ? 'rgba(0,200,150,0.15)' : 'rgba(255,255,255,0.05)';
+    const avatarColor = isPresent ? 'var(--green)' : 'var(--text3)';
+    const sid = s.id.replace(/'/g, "\\'");
+
+    return `<div class="student-card">
+      <div class="student-avatar" style="background:${avatarBg};color:${avatarColor}">${initials}</div>
+      <div class="student-info">
+        <div class="student-name">${s.name}</div>
+        <div class="student-id">${s.id}</div>
+        ${s.room ? `<div class="student-room">${s.room}</div>` : ''}
+        ${s.examTime ? `<div class="student-room" style="color:var(--amber);font-size:11px">⏰ ${s.examTime}</div>` : ''}
+        ${s.lastTime ? `<div class="student-room" style="color:var(--text3);font-size:10px">Last: ${s.lastTime}${s.markedBy ? ' · by ' + s.markedBy : ''}</div>` : ''}
+      </div>
+      <div class="student-actions">
+        <button onclick="showStudentDetail('${sid}')" style="background:transparent;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:all 0.2s;line-height:1;" title="View Details">ℹ️</button>
+        ${!isPresent
+          ? `<button class="status-pill" style="background:var(--green-bg);color:var(--green)" onclick="markStudent('${sid}','present')">✓ Sign In</button>`
+          : `<button class="status-pill" style="background:var(--red-bg);color:var(--red)" onclick="markStudent('${sid}','absent')">✗ Sign Out</button>`
+        }
+        ${isPresent && currentRole === 'admin' ? `<button class="btn-reset" onclick="resetStudent('${sid}')">↺ reset</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const present = students.filter(s => s.status === 'present').length;
+  const absent = students.length - present;
+  const rate = students.length ? Math.round(present / students.length * 100) : 0;
+  document.getElementById('stat-total').textContent = students.length;
+  document.getElementById('stat-present').textContent = present;
+  document.getElementById('stat-absent').textContent = absent;
+  document.getElementById('stat-rate').textContent = rate + '%';
+}
+
+function renderTimeline() {
+  const el = document.getElementById('timeline');
+  if (timeline.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--text3);font-size:13px">No activity yet</div>';
+    return;
+  }
+  el.innerHTML = timeline.slice(0,20).map(t => {
+    const isIn = t.action === 'Signed In';
+    return `<div class="timeline-item">
+      <div class="timeline-name">${t.name}</div>
+      <div class="timeline-meta">
+        <span class="timeline-badge" style="background:${isIn?'var(--green-bg)':'var(--red-bg)'};color:${isIn?'var(--green)':'var(--red)'}">${t.action}</span>
+        <span style="color:var(--text3)">${t.markedBy ? t.markedBy + ' · ' : ''}${t.time}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+let dashVisible = false;
+function toggleDashboard() {
+  dashVisible = !dashVisible;
+  const panel = document.getElementById('dashboard-panel');
+  const layout = document.querySelector('.main-layout');
+  const btn = document.getElementById('btn-dashboard');
+  if (dashVisible) {
+    panel.classList.add('show');
+    layout.style.display = 'none';
+    btn.textContent = '📋 Student List';
+    renderDashboard();
+  } else {
+    panel.classList.remove('show');
+    layout.style.display = 'flex';
+    btn.textContent = '📊 Dashboard';
+  }
+}
+
+
+
+function makeDonut(pct, color, size=80) {
+  const r = 28, cx = 40, cy = 40;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 80 80">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+      stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function genderBlock(label, emoji, color, studs) {
+  const present = studs.filter(s => s.status === 'present').length;
+  const total = studs.length;
+  const pct = total ? ((present/total)*100).toFixed(1) : 0;
+  const absent = total - present;
+  return `<div class="dash-gender">
+    <div class="dash-gender-title" style="color:${color}">${emoji} ${label}</div>
+    <div class="dash-gender-count" style="color:${color}">${present} out of ${total}</div>
+    <div class="dash-gender-sub">attended</div>
+    <div class="donut-wrap">
+      ${makeDonut(pct, color)}
+      <div class="donut-center">
+        <div class="donut-pct" style="color:${color}">${pct}%</div>
+        <div class="donut-lbl">Attendance</div>
+      </div>
+    </div>
+    <div class="dash-legend">
+      <span><i style="background:${color}"></i> Attended: ${present}</span>
+      <span><i style="background:#555"></i> Absent: ${absent}</span>
+    </div>
+  </div>`;
+}
+
+function setDashRoom(room) {
+  currentDashRoom = room;
+  renderDashboard();
+}
+
+function renderDashboard() {
+  // Build room dropdown dynamically from student data
+  const rooms = [...new Set(students.map(s => s.room).filter(Boolean))].sort();
+  const sel = document.getElementById('dash-room-select');
+  if (sel) {
+    const current = currentDashRoom;
+    sel.innerHTML = '<option value="all">All Rooms</option>' +
+      rooms.map(r => `<option value="${r}" ${current===r?'selected':''}>${r}</option>`).join('');
+    sel.value = current;
+  }
+
+  // Filter students by selected room
+  const filtered = currentDashRoom === 'all' ? students : students.filter(s => s.room === currentDashRoom);
+
+  // Rooms to show in grid
+  const roomsToShow = currentDashRoom === 'all' ? rooms : [currentDashRoom];
+  const gridEl = document.getElementById('dash-rooms-grid');
+
+  const roomColors = ['#4a9eff','#00c896','#e91e8c','#ffa502','#a78bfa','#34d399','#f87171','#60a5fa','#fb923c','#c084fc'];
+
+  gridEl.innerHTML = roomsToShow.map((room, i) => {
+    const roomStudents = students.filter(s => s.room === room);
+    const present = roomStudents.filter(s => s.status === 'present').length;
+    const absent = roomStudents.length - present;
+    const pct = roomStudents.length ? ((present / roomStudents.length) * 100).toFixed(1) : 0;
+    const color = roomColors[i % roomColors.length];
+    const r = 28, cx = 40, cy = 40;
+    const circ = 2 * Math.PI * r;
+    const dash = (pct / 100) * circ;
+    const donut = `<svg width="90" height="90" viewBox="0 0 80 80" style="transform:rotate(-90deg)">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+        stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+    </svg>`;
+    return `
+      <div style="background:var(--dark3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:${color};margin-bottom:12px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${room}</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div style="position:relative;flex-shrink:0;">
+            ${donut}
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+              <div style="font-size:14px;font-weight:700;color:${color};">${pct}%</div>
+              <div style="font-size:9px;color:var(--text2);">attend</div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:22px;font-weight:700;color:${color};margin-bottom:2px;">${present}<span style="font-size:12px;color:var(--text2);font-weight:400;"> / ${roomStudents.length}</span></div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">students present</div>
+            <div style="height:5px;background:var(--dark2);border-radius:999px;overflow:hidden;">
+              <div style="width:${pct}%;height:100%;background:${color};border-radius:999px;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:8px;">
+          <span>✅ Present: <strong style="color:var(--green)">${present}</strong></span>
+          <span>❌ Absent: <strong style="color:var(--red)">${absent}</strong></span>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Overall summary
+  const totalPresent = filtered.filter(s => s.status === 'present').length;
+  const totalAbsent = filtered.length - totalPresent;
+  const totalPct = filtered.length ? ((totalPresent / filtered.length) * 100).toFixed(1) : 0;
+
+  document.getElementById('dash-overall').innerHTML = `
+    <div class="dash-overall-title">${currentDashRoom === 'all' ? 'OVERALL — ALL ROOMS' : 'ROOM TOTAL — ' + currentDashRoom.toUpperCase()}</div>
+    <div class="dash-overall-grid">
+      <div class="dash-overall-item">
+        <div class="dash-overall-icon">✅</div>
+        <div class="dash-overall-num" style="color:var(--green)">${totalPresent}</div>
+        <div class="dash-overall-out">present students</div>
+        <div class="dash-overall-bar"><div class="dash-overall-fill" style="width:${totalPct}%;background:var(--green)"></div></div>
+        <div class="dash-overall-pct" style="color:var(--green)">${totalPct}% Attendance</div>
+      </div>
+      <div class="dash-overall-item">
+        <div class="dash-overall-icon">❌</div>
+        <div class="dash-overall-num" style="color:var(--red)">${totalAbsent}</div>
+        <div class="dash-overall-out">absent students</div>
+        <div class="dash-overall-bar"><div class="dash-overall-fill" style="width:${100-totalPct}%;background:var(--red)"></div></div>
+        <div class="dash-overall-pct" style="color:var(--red)">${(100-totalPct).toFixed(1)}% Absent</div>
+      </div>
+      <div class="dash-overall-item">
+        <div class="dash-overall-icon">👥</div>
+        <div class="dash-overall-num" style="color:var(--amber)">${filtered.length}</div>
+        <div class="dash-overall-out">total students</div>
+        <div class="dash-overall-bar"><div class="dash-overall-fill" style="width:100%;background:var(--amber)"></div></div>
+        <div class="dash-overall-pct" style="color:var(--amber)">${roomsToShow.length} Room${roomsToShow.length!==1?'s':''} Shown</div>
+      </div>
+    </div>`;
+}
+
+// ─── CLEAR ALL STUDENTS ───────────────────────────────────────────────────────
+function confirmClearStudents() {
+  const modal = document.createElement('div');
+  modal.id = 'clear-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:#1c2030;border:1px solid rgba(255,71,87,0.3);border-radius:18px;padding:32px;width:100%;max-width:400px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">🗑️</div>
+      <div style="font-size:20px;font-weight:700;color:#e8eaf0;margin-bottom:8px;">Clear Student List?</div>
+      <div style="font-size:13px;color:#8b90a0;margin-bottom:24px;line-height:1.6;">This will permanently delete <strong style="color:#ff4757">all ${students.length} students</strong> from the database. This action cannot be undone.</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('clear-modal').remove()" style="flex:1;padding:13px;background:transparent;color:#8b90a0;border:1px solid rgba(255,255,255,0.07);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;">Cancel</button>
+        <button onclick="clearAllStudents()" style="flex:1;padding:13px;background:#ff4757;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;">Yes, Clear All</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function clearAllStudents() {
+  const modal = document.getElementById('clear-modal');
+  if (modal) modal.remove();
+
+  try {
+    if (db) {
+      // Delete all students from Firestore in batches
+      const snapshot = await db.collection('students').get();
+      const batch = db.batch();
+      snapshot.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+
+      // Also clear timeline
+      const tlSnap = await db.collection('timeline').get();
+      const batch2 = db.batch();
+      tlSnap.docs.forEach(doc => batch2.delete(doc.ref));
+      await batch2.commit();
+    } else {
+      localStorage.removeItem('baniyas_students');
+      localStorage.removeItem('baniyas_timeline');
+    }
+
+    students = [];
+    timeline = [];
+    updateStats();
+    renderStudents();
+    renderTimeline();
+    notify('Student list cleared. Ready for new import ✅', 'amber');
+  } catch(e) {
+    notify('Error clearing: ' + e.message, 'red');
+  }
+}
+
+// ─── ASSESSOR ────────────────────────────────────────────────────────────────
+let currentAssessorRole = null; // 'exam' | 'interview' | 'medical'
+let assessorFilter = 'all';
+let assessorRoom = 'all';
+let assessments = {}; // { studentId: { exam, interview, medical } }
+let assessorUnsubscribe = null;
+
+const ASSESSOR_ROLE_LABELS = {
+  exam: '📝 Admission Exam',
+  interview: '🎤 Interview',
+  medical: '🏥 Medical Exam'
+};
+
+function showAssessorLogin() {
+  currentAssessorRole = null;
+  document.querySelectorAll('#assessor-login-modal button[id^="role-"]').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background = 'var(--dark4)';
+  });
+  document.getElementById('assessor-login-modal').style.display = 'flex';
+}
+
+function closeAssessorLogin() {
+  document.getElementById('assessor-login-modal').style.display = 'none';
+  document.getElementById('assessor-login-err').style.display = 'none';
+  document.getElementById('assessor-email').value = '';
+  document.getElementById('assessor-password').value = '';
+  currentAssessorRole = null;
+}
+
+function selectAssessorRole(role) {
+  currentAssessorRole = role;
+  document.querySelectorAll('#assessor-login-modal button[id^="role-"]').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background = 'var(--dark4)';
+    b.style.color = 'var(--text)';
+  });
+  const btn = document.getElementById('role-' + role);
+  btn.style.borderColor = '#a78bfa';
+  btn.style.background = 'rgba(167,139,250,0.15)';
+  btn.style.color = '#a78bfa';
+  document.getElementById('assessor-role-err').style.display = 'none';
+}
+
+function doAssessorLogin() {
+  if (!currentAssessorRole) {
+    document.getElementById('assessor-role-err').style.display = 'block';
+    return;
+  }
+  const email = document.getElementById('assessor-email').value.trim();
+  const pass = document.getElementById('assessor-password').value;
+
+  if (FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY') {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then(() => {
+        if (!db) db = firebase.firestore();
+        closeAssessorLogin();
+        launchAssessorApp();
+      })
+      .catch(() => { document.getElementById('assessor-login-err').style.display = 'block'; });
+  } else {
+    document.getElementById('assessor-login-err').style.display = 'block';
+  }
+}
+
+function launchAssessorApp() {
+  document.getElementById('portal').style.display = 'none';
+  const appEl = document.getElementById('assessor-app');
+  appEl.style.display = 'flex';
+  document.getElementById('assessor-role-badge').textContent = ASSESSOR_ROLE_LABELS[currentAssessorRole];
+  document.getElementById('assessor-header-sub').textContent = ASSESSOR_ROLE_LABELS[currentAssessorRole] + ' Tracker';
+
+  // Show export for all assessors
+  document.getElementById('assessor-btn-export').style.display = 'inline-flex';
+
+  // Load students and assessments from Firestore
+  if (db) {
+    db.collection('students').onSnapshot(snap => {
+      students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      loadAssessments();
+    });
+  }
+}
+
+function loadAssessments() {
+  if (!db) return;
+  db.collection('assessments').onSnapshot(snap => {
+    assessments = {};
+    snap.docs.forEach(d => { assessments[d.id] = d.data(); });
+    renderAssessments();
+    updateAssessorStats();
+  });
+}
+
+function setAssessorRoom(room) {
+  assessorRoom = room;
+  renderAssessments();
+}
+
+function setAssessorFilter(f, el) {
+  assessorFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderAssessments();
+}
+
+function getAssessmentStatus(studentId) {
+  const a = assessments[studentId];
+  return a ? (a[currentAssessorRole] || 'pending') : 'pending';
+}
+
+function renderAssessments() {
+  const q = (document.getElementById('assessor-search').value || '').toLowerCase();
+  const grid = document.getElementById('assessor-grid');
+
+  // Populate room dropdown dynamically
+  const rooms = [...new Set(students.map(s => s.room).filter(Boolean))].sort();
+  const sel = document.getElementById('assessor-room-select');
+  if (sel) {
+    sel.innerHTML = '<option value="all">All Rooms</option>' +
+      rooms.map(r => `<option value="${r}" ${assessorRoom===r?'selected':''}>${r}</option>`).join('');
+    sel.value = assessorRoom;
+  }
+
+  let filtered = students.filter(s => {
+    const matchQ = !q || s.name?.toLowerCase().includes(q) || s.id?.toLowerCase().includes(q);
+    const status = getAssessmentStatus(s.id);
+    const matchF = assessorFilter === 'all' || 
+      (assessorFilter === 'completed' && status === 'completed') ||
+      (assessorFilter === 'pending' && status === 'pending');
+    const matchRoom = assessorRoom === 'all' || s.room === assessorRoom;
+    return matchQ && matchF && matchRoom;
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--text2);">No students found</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => {
+    const status = getAssessmentStatus(s.id);
+    const isCompleted = status === 'completed';
+    const color = isCompleted ? 'var(--green)' : 'var(--amber)';
+    const bg = isCompleted ? 'var(--green-bg)' : 'var(--amber-bg)';
+    const icon = isCompleted ? '✅' : '⏳';
+    const label = isCompleted ? 'Completed' : 'Not Yet Completed';
+
+    return `
+    <div style="background:var(--dark3);border:1px solid ${isCompleted ? 'rgba(0,200,150,0.2)' : 'var(--border)'};border-radius:var(--radius-lg);padding:16px;transition:all 0.2s;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--dark4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#a78bfa;flex-shrink:0;">${(s.name||'?')[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name || 'Unknown'}</div>
+          <div style="font-size:11px;color:var(--text2);">${s.id || ''} ${s.room ? '· ' + s.room : ''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:${bg};border-radius:8px;margin-bottom:12px;">
+        <span style="font-size:12px;font-weight:600;color:${color};">${icon} ${label}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="showStudentDetail('${s.id}')" style="background:transparent;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:all 0.2s;line-height:1;" title="View Details">ℹ️</button>
+        <button onclick="updateAssessment('${s.id}','completed')" style="flex:1;padding:8px;background:${isCompleted ? 'var(--green)' : 'transparent'};color:${isCompleted ? '#fff' : 'var(--green)'};border:1px solid var(--green);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;transition:all 0.2s;">
+          ✅ Completed
+        </button>
+        <button onclick="updateAssessment('${s.id}','pending')" style="flex:1;padding:8px;background:${!isCompleted ? 'var(--amber)' : 'transparent'};color:${!isCompleted ? '#fff' : 'var(--amber)'};border:1px solid var(--amber);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;transition:all 0.2s;">
+          ⏳ Not Yet
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateAssessment(studentId, status) {
+  if (!db) return;
+  try {
+    const ref = db.collection('assessments').doc(studentId);
+    await ref.set({ [currentAssessorRole]: status }, { merge: true });
+    notify(`Assessment updated: ${status === 'completed' ? 'Completed ✅' : 'Not Yet Completed ⏳'}`, status === 'completed' ? 'green' : 'amber');
+  } catch(e) {
+    notify('Error updating: ' + e.message, 'red');
+  }
+}
+
+function updateAssessorStats() {
+  const total = students.length;
+  const completed = students.filter(s => getAssessmentStatus(s.id) === 'completed').length;
+  const pending = total - completed;
+  const rate = total ? ((completed / total) * 100).toFixed(0) : 0;
+  document.getElementById('astat-total').textContent = total;
+  document.getElementById('astat-completed').textContent = completed;
+  document.getElementById('astat-pending').textContent = pending;
+  document.getElementById('astat-rate').textContent = rate + '%';
+}
+
+function exportAssessments() {
+  const rows = [['Student ID','Name','Room','Exam','Interview','Medical']];
+  students.forEach(s => {
+    const a = assessments[s.id] || {};
+    rows.push([s.id, s.name, s.room, a.exam||'pending', a.interview||'pending', a.medical||'pending']);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Assessments');
+  XLSX.writeFile(wb, 'Baniyas_Assessments.xlsx');
+}
+
+async function showStudentDetail(studentId) {
+  const s = students.find(x => x.id === studentId);
+  if (!s) return;
+
+  // Show loading state first
+  document.getElementById('sdm-assessments').innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--text2);font-size:12px;">Loading assessments...</div>`;
+  document.getElementById('student-detail-modal').style.display = 'flex';
+
+  // Always fetch fresh assessment data directly from Firestore BEFORE rendering
+  if (db) {
+    try {
+      const doc = await db.collection('assessments').doc(studentId).get();
+      if (doc.exists) assessments[studentId] = doc.data();
+      else assessments[studentId] = {};
+    } catch(e) { console.warn('Could not fetch assessment:', e); }
+  }
+  const isPresent = s.status === 'present';
+  const initials = (s.name||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+  // Header
+  document.getElementById('sdm-avatar').textContent = initials;
+  document.getElementById('sdm-avatar').style.background = isPresent ? 'rgba(0,200,150,0.15)' : 'rgba(255,255,255,0.05)';
+  document.getElementById('sdm-avatar').style.color = isPresent ? 'var(--green)' : 'var(--text3)';
+  document.getElementById('sdm-name').textContent = s.name || '';
+  document.getElementById('sdm-id').textContent = (s.id || '') + (s.nameAr ? ' · ' + s.nameAr : '');
+  const badge = document.getElementById('sdm-status-badge');
+  badge.textContent = isPresent ? '✅ Present' : '⏳ Absent';
+  badge.style.background = isPresent ? 'var(--green-bg)' : 'var(--red-bg)';
+  badge.style.color = isPresent ? 'var(--green)' : 'var(--red)';
+
+  // Info grid
+  const fields = [
+    ['🏫 Room', s.room],
+    ['⏰ Exam Time', s.examTime],
+    ['🏛 Campus', s.campus],
+    ['🆔 EID', s.eid],
+    ['📞 Phone 1', s.phone1],
+    ['📞 Phone 2', s.phone2],
+    ['📱 Mobile', s.mobile],
+    ['📧 Email', s.email],
+    ['🕐 Last Action', s.lastTime ? s.lastTime + (s.markedBy ? ' by ' + s.markedBy : '') : null],
+  ].filter(([,v]) => v);
+
+  document.getElementById('sdm-info-grid').innerHTML = fields.map(([label, val]) => `
+    <div style="background:var(--dark2);border-radius:8px;padding:10px 12px;">
+      <div style="font-size:10px;color:var(--text2);margin-bottom:3px;">${label}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--text);word-break:break-all;">${val}</div>
+    </div>`).join('');
+
+  // Assessment status
+  const a = assessments[studentId] || {};
+  const assessList = [
+    { key: 'exam', label: '📝 Exam', icon: '📝' },
+    { key: 'interview', label: '🎤 Interview', icon: '🎤' },
+    { key: 'medical', label: '🏥 Medical', icon: '🏥' },
+  ];
+  document.getElementById('sdm-assessments').innerHTML = assessList.map(({ key, label }) => {
+    const done = (a[key] || 'pending') === 'completed';
+    return `<div style="background:${done ? 'var(--green-bg)' : 'var(--dark4)'};border:1px solid ${done ? 'rgba(0,200,150,0.2)' : 'var(--border)'};border-radius:8px;padding:10px;text-align:center;">
+      <div style="font-size:18px;margin-bottom:4px;">${done ? '✅' : '⏳'}</div>
+      <div style="font-size:10px;font-weight:600;color:${done ? 'var(--green)' : 'var(--text2)'};">${label.split(' ')[1]}</div>
+      <div style="font-size:9px;color:${done ? 'var(--green)' : 'var(--text3)'};">${done ? 'Done' : 'Pending'}</div>
+    </div>`;
+  }).join('');
+
+}
+
+function closeStudentDetail() {
+  document.getElementById('student-detail-modal').style.display = 'none';
+}
+
+function exitAssessorApp() {
+  document.getElementById('assessor-app').style.display = 'none';
+  document.getElementById('portal').style.display = 'flex';
+  if (firebase.auth) firebase.auth().signOut();
+  students = [];
+  assessments = {};
+  currentAssessorRole = null;
+}
+
+// ─── NOTIFICATION ─────────────────────────────────────────────────────────────
+function notify(msg, type = 'green') {
+  const el = document.getElementById('notif');
+  const colors = { green: '#1D9E75', red: '#E24B4A', amber: '#BA7517' };
+  el.textContent = msg;
+  el.style.background = colors[type] || colors.green;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+
+<!-- Firebase SDKs - loaded eagerly for reliability -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</body>
+</html>
